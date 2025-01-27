@@ -89,11 +89,13 @@ public abstract class DockerExtension(
             project.tasks.register<CreateJvmDockerfile>(createDockerfileTaskName) {
                 group = "docker"
                 appName = project.name
+                val nameProvider =
+                    project.provider { "dockerfiles/${project.name}-${baseImageName.get()}-${baseImageTag.get()}.dockerfile" }
                 destinationFile =
                     project
                         .layout
                         .buildDirectory
-                        .file("dockerfiles/${project.name}-${baseImageName.get()}-${baseImageTag.get()}.dockerfile")
+                        .file(nameProvider)
                 action()
             }
 
