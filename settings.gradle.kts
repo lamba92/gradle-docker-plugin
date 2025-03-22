@@ -25,6 +25,7 @@ develocity {
         publishing {
             onlyIf { isCi }
         }
+        tag("backend-engineer")
     }
 }
 
