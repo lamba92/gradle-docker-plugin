@@ -2,7 +2,7 @@
 
 plugins {
     id("org.gradle.toolchains.foojay-resolver-convention") version "1.0.0"
-    id("com.gradle.enterprise") version "3.19.2"
+    id("com.gradle.develocity") version "4.0.2"
 }
 
 rootProject.name = "gradle-docker-plugin-repository"
