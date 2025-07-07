@@ -178,7 +178,7 @@ private fun Project.configurePlugin(
             group = "docker"
             dependsOn(dockerBuildTask)
             executable = "docker"
-            args("run", "--rm", baseTag.get().toString())
+            args("run", "--rm", baseTag.get())
         }
     }
 }
@@ -218,6 +218,7 @@ private fun Project.configureBuildx(
 
     val dockerBuildxBuildTask =
         tasks.register<Exec>("dockerBuildxBuild${dockerImage.name.toCamelCase()}") {
+            dependsOn(dockerPrepareTask)
             group = "build"
             executable = "docker"
             args(buildxArgs(false))

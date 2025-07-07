@@ -5,6 +5,7 @@ plugins {
     application
     id("io.github.lamba92.docker")
     alias(libs.plugins.ktlint)
+    id("com.github.johnrengelman.shadow") version "8.1.1"
 }
 
 group = "com.github.lamba92"
@@ -31,7 +32,14 @@ docker {
             RUN echo "Hello, World!"
             """.trimIndent()
     }
-    images.main {
-        System.getenv("IMAGE_VERSION")?.let { imageVersion = it }
+    images {
+        all {
+            System.getenv("IMAGE_VERSION")?.let { imageVersion = it }
+        }
+
+        // Example on how to register a new image to use the
+        // shadow plugin. The tasks dockerXXXShadow is available
+        val shadow by registering
+        configureJvmApplication(shadow, tasks.installShadowDist)
     }
 }
