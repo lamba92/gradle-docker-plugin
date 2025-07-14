@@ -140,7 +140,7 @@ private fun Project.configurePlugin(
                         buildArgs.get().forEach { (key, value) ->
                             addAll("--build-arg", "$key=$value")
                         }
-                        addAll("-t", baseTag.get().toString())
+                        addAll("-t", baseTag.get())
                         dockerExtension.registries.forEach { registry ->
                             val prefix = registry.imageTagPrefix.get().suffixIfNot("/")
                             addAll("-t", "$prefix${baseTag.get()}")
