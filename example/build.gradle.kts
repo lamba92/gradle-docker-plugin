@@ -21,7 +21,8 @@ application {
 
 docker {
     registries {
-        System.getenv("REPOSITORY_OWNER")
+        System
+            .getenv("REPOSITORY_OWNER")
             ?.let { githubContainerRegistry(it) }
     }
     configureJvmApplication(images.main) {

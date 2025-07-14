@@ -9,7 +9,8 @@ plugins {
 group = "io.github.lamba92"
 
 val githubRef =
-    System.getenv("GITHUB_EVENT_NAME")
+    System
+        .getenv("GITHUB_EVENT_NAME")
         ?.takeIf { it == "release" }
         ?.let { System.getenv("GITHUB_REF") }
         ?.removePrefix("refs/tags/")
@@ -63,7 +64,11 @@ tasks {
         useJUnitPlatform()
         environment(
             "TEST_PROJECT_PATH",
-            rootProject.layout.projectDirectory.dir("test-project").asFile.absolutePath,
+            rootProject
+                .layout
+                .projectDirectory
+                .dir("test-project")
+                .asFile.absolutePath,
         )
         testLogging {
             showExceptions = true

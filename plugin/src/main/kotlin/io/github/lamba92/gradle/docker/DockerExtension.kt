@@ -27,7 +27,8 @@ public abstract class DockerExtension(
     public val extensionName: String,
     public val images: DockerImageContainer,
     public val registries: DockerRegistryContainer,
-) : ExtensionAware, Named {
+) : ExtensionAware,
+    Named {
     override fun getName(): String = extensionName
 
     /**

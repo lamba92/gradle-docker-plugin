@@ -195,7 +195,9 @@ private fun Project.configureBuildx(
     fun buildxArgs(publish: Boolean) =
         buildList {
             addAll("buildx", "build")
-            dockerImage.platforms.get()
+            dockerImage
+                .platforms
+                .get()
                 .takeIf { it.isNotEmpty() }
                 ?.joinToString(",")
                 ?.let { addAll("--platform", it) }

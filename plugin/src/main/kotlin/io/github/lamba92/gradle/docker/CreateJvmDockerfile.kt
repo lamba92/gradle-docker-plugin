@@ -28,18 +28,22 @@ import javax.inject.Inject
  */
 public open class CreateJvmDockerfile
     @Inject
-    constructor(objects: ObjectFactory) : DefaultTask() {
+    constructor(
+        objects: ObjectFactory,
+    ) : DefaultTask() {
         @get:OutputFile
         public val destinationFile: RegularFileProperty = objects.fileProperty()
 
         @get:Input
         public val baseImageName: Property<String> =
-            objects.property<String>()
+            objects
+                .property<String>()
                 .convention("eclipse-temurin")
 
         @get:Input
         public val baseImageTag: Property<String> =
-            objects.property<String>()
+            objects
+                .property<String>()
                 .convention("21-alpine")
 
         @get:Input
@@ -57,7 +61,8 @@ public open class CreateJvmDockerfile
          */
         @TaskAction
         public fun writeFile() {
-            destinationFile.get()
+            destinationFile
+                .get()
                 .asFile
                 .writeText(
                     jvmAppDockerImageString(
