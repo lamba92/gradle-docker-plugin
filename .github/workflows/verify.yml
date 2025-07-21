@@ -27,7 +27,7 @@ jobs:
   tests:
     continue-on-error: true
     runs-on: ubuntu-latest
-    name: Tests
+    name: Plugin tests
     steps:
       - name: Log in to GitHub Container Registry
         run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
@@ -40,14 +40,14 @@ jobs:
         with:
           distribution: adopt
           java-version: 21
-      - run: ./gradlew :example:dockerPush :example:dockerBuildxPush
+      - run: ./gradlew :example:dockerPush :example:dockerBuildxPush --info
         env:
           REPOSITORY_OWNER: ${{ github.repository_owner }}
           IMAGE_VERSION: ${{ github.run_id }}-${{ github.run_number }}
 
   publication:
     runs-on: ubuntu-latest
-    name: Publication
+    name: Maven publication
     steps:
       - uses: actions/checkout@v4
       - uses: gradle/actions/setup-gradle@v4

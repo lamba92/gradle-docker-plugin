@@ -1,6 +1,6 @@
 # Lamba's Gradle Docker Plugin
 
-This plugin is a Gradle plugin that provides tasks to build, publish and run Docker images. 
+This plugin is a Gradle plugin that provides tasks to build, push and run Docker images. 
 It integrates with the JVM ecosystem to have no configuration for the most common use cases.
 
 # Table of Contents
@@ -10,15 +10,15 @@ It integrates with the JVM ecosystem to have no configuration for the most commo
 3. [Usage](#usage)
 4. [Tasks](#tasks)
     - [Build Tasks](#build)
-    - [Publish Tasks](#publish)
+    - [Push Tasks](#push)
     - [Run Tasks](#run)
 5. [CI/CD Configuration](#cicd-configuration-for-docker-plugin)
-    - [Single-Platform Build and Publish](#single-platform-build-and-publish)
-    - [Multi-Platform Build and Publish](#multi-platform-build-and-publish)
+    - [Single-Platform Build and Push](#single-platform-build-and-push)
+    - [Multi-Platform Build and Push](#multi-platform-build-and-push)
 
 ## Features
 
-- Supports building, publishing, and running Docker images.
+- Supports building, pushing and running Docker images.
 - Integrates seamlessly with the JVM ecosystem for common use cases.
 - Provides preconfigured support for various Docker registries:
     - GitHub Container Registry
@@ -32,7 +32,7 @@ It integrates with the JVM ecosystem to have no configuration for the most commo
     - Support for multi-platform builds using Docker Buildx.
 - Includes predefined Gradle tasks for:
     - Building images (`dockerBuild`, `dockerBuildxBuild`).
-    - Publishing images (`dockerPublish`).
+    - Pushing images (`dockerPush`).
     - Running images (`dockerRun`).
 - Extensible to define and configure additional Docker images and registries.
 - Compatible with CI/CD workflows, such as GitHub Actions.
@@ -69,7 +69,7 @@ docker {
         
         // you can define as many registries as you want and configure them as you like
         register("custom-registry") {
-            // the `imageTagPrefix` is used to prefix the image tag when publishing the image as required by Docker registries.
+            // the `imageTagPrefix` is used to prefix the image tag when pushing the image as required by Docker registries.
             imageTagPrefix = "my-registry.com"
         }
     }
@@ -78,10 +78,10 @@ docker {
         // the `main` image is the one that will be built by default
         main { 
             imageName = project.name // default
-            imageTag = project.version.toString() // default
+            imageTag = provider { project.version.toString() } // default
             isLatestTag = true // default, if true, the image will have an additional tag`latest`
             buildArgs = emptyMap() // default
-            platforms = listOf("linux/amd64", "linux/arm64") // default, used for task `dockerBuildxBuild` and `dockerBuildxPublish`
+            platforms = listOf("linux/amd64", "linux/arm64") // default, used for task `dockerBuildxBuild` and `dockerBuildxPush`
         }
         
         // you can define as many images as you want and configure them as you like
@@ -122,13 +122,13 @@ docker {
 - `dockerBuildxBuild` - Builds all Docker images using [Buildx](https://github.com/docker/buildx) for the specified platforms in the image configuration.
 - `dockerBuildxBuild{ImageName}` - Builds `main` Docker image using [Buildx](https://github.com/docker/buildx).
 
-### publish
+### push
 
 **NOTE** Login to the registries is required OUTSIDE the plugin and Gradle because of how the Docker CLI works.
 
-- `dockerPublish`: Builds and publishes all Docker images to the registered registries. 
-- `dockerPublish{ImageName}To{RegistryName}`: Builds and publishes a specific Docker image to a specific registry.
-- `dockerPublishAllImagesTo{RegistryName}`: Builds and publishes all Docker images to a specific registry.
+- `dockerPush`: Builds and pushes all Docker images to the registered registries. 
+- `dockerPush{ImageName}To{RegistryName}`: Builds and pushes a specific Docker image to a specific registry.
+- `dockerPushAllImagesTo{RegistryName}`: Builds and pushes all Docker images to a specific registry.
 
 ### run
 CLI command used is `docker run --rm {imageName}:{imageTag}`:
@@ -138,13 +138,13 @@ CLI command used is `docker run --rm {imageName}:{imageTag}`:
 
 # CI/CD Configuration for Docker Plugin
 
-The following sections detail how to set up CI/CD pipelines for building and publishing Docker images using Gradle's Docker Plugin. Both single-platform and multi-platform workflows are covered, with examples tailored for GitHub Actions.
+The following sections detail how to set up CI/CD pipelines for building and pushing Docker images using Gradle's Docker Plugin. Both single-platform and multi-platform workflows are covered, with examples tailored for GitHub Actions.
 
 ---
 
-## Single-Platform Build and Publish
+## Single-Platform Build and Push
 
-This workflow builds and publishes Docker images for a single platform. It assumes the use of the `dockerPublish` Gradle task and configuration of the `main` Docker image in the Gradle file.
+This workflow builds and pushes Docker images for a single platform. It assumes the use of the `dockerPush` Gradle task and configuration of the `main` Docker image in the Gradle file.
 
 ### Prerequisites
 
@@ -153,12 +153,12 @@ This workflow builds and publishes Docker images for a single platform. It assum
     - `packages: write`
 
 2. **Gradle Configuration**:
-   Ensure your Gradle `docker` block is configured correctly to publish Docker images.
+   Ensure your Gradle `docker` block is configured correctly to push Docker images.
 
 ### Example Workflow
 
 ```yaml
-name: Build and Publish Docker Image
+name: Build and Push Docker Image
 
 on:
   push:
@@ -170,9 +170,9 @@ permissions:
   packages: write
 
 jobs:
-  build-and-publish:
+  build-and-push:
     runs-on: ubuntu-latest
-    name: Build and Publish Docker Image
+    name: Build and Push Docker Image
     steps:
       # Checkout the repository
       - uses: actions/checkout@v4
@@ -193,19 +193,19 @@ jobs:
       - name: Log in to GitHub Container Registry
         run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
 
-      # Build and publish the Docker image
-      - name: Build and Publish Docker Image
-        run: ./gradlew dockerPublish
+      # Build and push the Docker image
+      - name: Build and Push Docker Image
+        run: ./gradlew dockerPush
 ```
 
 ### Key Notes
 
-- The `dockerPublish` task builds and publishes all defined images in the `docker` block to the configured registries.
+- The `dockerPush` task builds and pushes all defined images in the `docker` block to the configured registries.
 - Use GitHub's `GITHUB_TOKEN` for authentication with GitHub Container Registry.
 
 ---
 
-## Multi-Platform Build and Publish
+## Multi-Platform Build and Push
 
 This workflow utilizes Docker Buildx to create multi-platform images. Specify the target platforms in your Gradle `docker` configuration.
 
@@ -232,7 +232,7 @@ This workflow utilizes Docker Buildx to create multi-platform images. Specify th
 ### Example Workflow
 
 ```yaml
-name: Build and Publish Multi-Platform Docker Image
+name: Build and Push Multi-Platform Docker Image
 
 on:
   push:
@@ -244,9 +244,9 @@ permissions:
   packages: write
 
 jobs:
-  build-and-publish-multiplatform:
+  build-and-push-multiplatform:
     runs-on: ubuntu-latest
-    name: Build and Publish Multi-Platform Docker Image
+    name: Build and Push Multi-Platform Docker Image
     steps:
       # Checkout the repository
       - uses: actions/checkout@v4
@@ -271,12 +271,12 @@ jobs:
       - name: Log in to GitHub Container Registry
         run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
 
-      # Build and publish the multi-platform Docker image
-      - name: Build and Publish Multi-Platform Docker Image
-        run: ./gradlew dockerBuildxPublish
+      # Build and push the multi-platform Docker image
+      - name: Build and Push Multi-Platform Docker Image
+        run: ./gradlew dockerBuildxPush
 ```
 
 ### Key Notes
 
 - Multi-platform support is extremely useful for environments requiring ARM architecture support, such as Raspberry Pi or AWS Graviton.
-- Ensure proper registry permissions when publishing images, especially for private Docker registries.
+- Ensure proper registry permissions when pushing images, especially for private Docker registries.
