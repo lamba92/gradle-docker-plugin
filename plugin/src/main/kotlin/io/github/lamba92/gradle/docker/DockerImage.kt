@@ -55,6 +55,7 @@ public class DockerImage(
     public val imageVersion: Property<String> =
         project.objects
             .property<String>()
+            .convention(project.providers.provider { project.version.toString() })
 
     public val buildArgs: MapProperty<String, String> =
         project.objects.mapProperty()
