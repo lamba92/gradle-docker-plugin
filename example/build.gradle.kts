@@ -1,5 +1,8 @@
 @file:Suppress("UnstableApiUsage")
 
+import java.io.ByteArrayOutputStream
+
+
 plugins {
     kotlin("jvm") version "2.2.0"
     application
@@ -42,5 +45,31 @@ docker {
         // shadow plugin. The tasks dockerXXXShadow is available
         val shadow by registering
         configureJvmApplication(shadow, tasks.installShadowDist)
+    }
+}
+
+tasks {
+    register<Exec>("verifyDockerRun") {
+        val dockerRun = dockerRun.get()
+        group = "verification"
+        dependsOn(dockerRun.dependsOn)
+        executable = "docker"
+        args(dockerRun.args)
+        val capturedOutput = ByteArrayOutputStream()
+        standardOutput = capturedOutput
+        doLast {
+            val output =
+                capturedOutput
+                    .toString(Charsets.UTF_8)
+                    .trimEnd()
+            val expected = "Hello Kotlin!"
+            require(output == expected) {
+                """
+                Outputs do not match:
+                   - expected: `$expected`
+                   - actual: `$output`
+                """.trimIndent()
+            }
+        }
     }
 }

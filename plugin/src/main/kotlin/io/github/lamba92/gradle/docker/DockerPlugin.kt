@@ -190,7 +190,7 @@ private fun Project.configurePlugin(
 
         val dockerRunTaskName = if (name == "main") "dockerRun" else "dockerRun${name.toCamelCase()}"
         tasks.register<Exec>(dockerRunTaskName) {
-            group = "docker"
+            group = "application"
             dependsOn(dockerBuildTask)
             executable = "docker"
             args("run", "--rm", "${imageName.get()}:${imageVersion.get()}")
