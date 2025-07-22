@@ -193,7 +193,7 @@ private fun Project.configurePlugin(
             group = "docker"
             dependsOn(dockerBuildTask)
             executable = "docker"
-            args("run", "--rm", imageVersion.get())
+            args("run", "--rm", "${imageName.get()}:${imageVersion.get()}")
         }
     }
 }
@@ -232,9 +232,9 @@ private fun Project.configureBuildx(
             executable = "docker"
             args(
                 buildxArgs {
-                    add("${dockerImage.imageName.get()}:${dockerImage.imageVersion.get()}")
+                    addAll("--tag", "${dockerImage.imageName.get()}:${dockerImage.imageVersion.get()}")
                     if (dockerImage.isLatestTag.get()) {
-                        add("${dockerImage.imageName.get()}:latest")
+                        addAll("--tag", "${dockerImage.imageName.get()}:latest")
                     }
                     add("--load")
                 },
@@ -283,7 +283,7 @@ private fun Project.configureBuildxPushing(
         val pushAllBuildxToThisRepositoryTaskName = "pushAllBuildxImagesTo${registryName.toCamelCase()}"
         val pushAllToThisRepositoryTask =
             tasks.getOrRegister(pushAllBuildxToThisRepositoryTaskName) {
-                group = "pushing"
+                group = "publishing"
             }
         pushAllToThisRepositoryTask {
             dependsOn(dockerBuildxPushTask)
@@ -305,7 +305,7 @@ private fun Project.configurePublication(
         val dockerPushTask =
             tasks.register<Exec>("dockerPush${dockerImage.name.toCamelCase()}To${registryName.toCamelCase()}") {
                 dependsOn(dockerBuildTask)
-                group = "pushing"
+                group = "publishing"
                 executable = "docker"
                 args(
                     "push",
@@ -315,26 +315,24 @@ private fun Project.configurePublication(
 
         val dockerPushLatestTaskName =
             "dockerPush${dockerImage.name.toCamelCase()}LatestTo${registryName.toCamelCase()}"
-        if (dockerImage.isLatestTag.get()) {
+        val dockerPushLatestTask =
             tasks.register<Exec>(dockerPushLatestTaskName) {
                 dependsOn(dockerBuildTask)
-                group = "pushing"
+                onlyIf { dockerImage.isLatestTag.get() }
+                group = "publishing"
                 executable = "docker"
                 args("push", "${prefix.get()}${dockerImage.imageName.get()}:latest")
             }
-        }
 
         val pushAllToThisRepositoryTask =
             tasks.getOrRegister("dockerPushAllImagesTo${registryName.toCamelCase()}") {
-                group = "pushing"
+                group = "publishing"
             }
         pushAllToThisRepositoryTask {
-            dependsOn(dockerPushTask)
-            if (dockerImage.isLatestTag.get()) dependsOn(dockerPushLatestTaskName)
+            dependsOn(dockerPushTask, dockerPushLatestTask)
         }
         dockerPushAll {
-            dependsOn(dockerPushTask)
-            if (dockerImage.isLatestTag.get()) dependsOn(dockerPushLatestTaskName)
+            dependsOn(dockerPushTask, dockerPushLatestTask)
         }
     }
 }
