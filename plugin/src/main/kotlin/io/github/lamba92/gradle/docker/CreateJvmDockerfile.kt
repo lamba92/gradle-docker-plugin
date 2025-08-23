@@ -51,7 +51,7 @@ public open class CreateJvmDockerfile
 
         @get:Input
         @get:Optional
-        public val additionalConfig: Property<String?> = objects.property<String?>()
+        public val additionalConfig: Property<String> = objects.property<String>()
 
         /**
          * Writes the content of a Dockerfile for a JVM application to the specified [destinationFile].
