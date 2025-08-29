@@ -8,7 +8,7 @@ plugins {
     application
     id("io.github.lamba92.docker")
     alias(libs.plugins.ktlint)
-    id("com.gradleup.shadow") version "9.0.0-rc3"
+    id("com.gradleup.shadow") version "9.1.0"
 }
 
 group = "com.github.lamba92"
