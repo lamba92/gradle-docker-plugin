@@ -4,7 +4,7 @@ import java.io.ByteArrayOutputStream
 
 
 plugins {
-    kotlin("jvm") version "2.2.0"
+    kotlin("jvm") version "2.2.21"
     application
     id("io.github.lamba92.docker")
     alias(libs.plugins.ktlint)
